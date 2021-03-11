@@ -70,6 +70,8 @@ func main() {
 					case sdl.GetScancodeFromKey(sdl.K_LEFT):
 					case sdl.GetScancodeFromKey(sdl.K_DOWN):
 					case sdl.GetScancodeFromKey(sdl.K_UP):
+					case sdl.GetScancodeFromKey(sdl.K_ESCAPE):
+						running = false
 					}
 				}
 			}
@@ -110,11 +112,6 @@ func update(o *object) {
 }
 
 func draw(rdr *sdl.Renderer, o object) {
-	r, g, b, a, err := rdr.GetDrawColor() // get previous draw color
-	if err != nil {
-		panic(err)
-	}
-	rdr.SetDrawColor(100, 100, 100, 100)
 	oProjected := calcObjectProjection(&o)
 	for _, screenTri := range oProjected {
 		// scale
@@ -124,15 +121,8 @@ func draw(rdr *sdl.Renderer, o object) {
 			screenTri[i][0] *= 0.5 * WINW
 			screenTri[i][1] *= 0.5 * WINH
 		}
-		rdr.DrawLine(int32(math.Round(screenTri[0][0])), int32(math.Round(screenTri[0][1])),
-			int32(math.Round(screenTri[1][0])), int32(math.Round(screenTri[1][1])))
-		rdr.DrawLine(int32(math.Round(screenTri[1][0])), int32(math.Round(screenTri[1][1])),
-			int32(math.Round(screenTri[2][0])), int32(math.Round(screenTri[2][1])))
-		rdr.DrawLine(int32(math.Round(screenTri[2][0])), int32(math.Round(screenTri[2][1])),
-			int32(math.Round(screenTri[0][0])), int32(math.Round(screenTri[0][1])))
+		drawTriangle(rdr, &screenTri, &sdl.Color{100, 100, 100, 100})
 	}
-	// change the color back
-	rdr.SetDrawColor(r, g, b, a)
 }
 
 // @TODO: Might want to clean up these temporaries for speed's sake

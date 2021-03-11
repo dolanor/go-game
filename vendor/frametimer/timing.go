@@ -15,7 +15,7 @@ type Timer struct {
 	lastTime    time.Time
 }
 
-//AddTime calculates the time since the last frame was added
+//RecordTime calculates the time since the last frame was added
 //and resets the timer. It also increments the TotalFrames
 //and the TotalTime the timer has been running.
 func (ft *Timer) RecordTime() int64 {

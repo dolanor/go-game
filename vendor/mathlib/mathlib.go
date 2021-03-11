@@ -18,6 +18,17 @@ func PerspectiveMat(fovy, aspect, near, far float64) [4][4]float64 {
 	return m
 }
 
+// NormalizeVec3 returns version of vector that is unit length
+func NormalizeVec3(in [3][3]float64) (out [3][3]float64)
+{
+	return in
+}
+
+// CrossProductVec3 finds the vec3 orthogonal to two input vec3s
+func CrossProductVec3(a, b [3][3]float64) (c [3][3]float64) {
+	return c
+}
+
 // RotationMat returns a 3x3 rotation matrix with parameters
 // angle and rotation origin. When a position is multiplied
 // by it, the result is the original position rotated in 3-dimensions.

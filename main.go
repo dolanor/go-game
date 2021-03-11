@@ -78,7 +78,7 @@ func main() {
 		update(&cube)
 		// draw
 		rect := sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
-		rdr.SetDrawColor(10, 200, 10, 100)
+		rdr.SetDrawColor(10, 200, 200, 100)
 		rdr.FillRect(&rect)
 		draw(rdr, cube)
 		rdr.Present()

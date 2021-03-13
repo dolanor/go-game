@@ -10,17 +10,13 @@ func initSdl() (win *sdl.Window, rdr *sdl.Renderer, surf *sdl.Surface, cleanupFu
 	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}
-
 	win, rdr, err = sdl.CreateWindowAndRenderer(WINW, WINH, sdl.WINDOW_SHOWN)
-
 	if err != nil {
 		panic(err)
 	}
-
 	if surf, err = win.GetSurface(); err != nil {
 		panic(err)
 	}
-
 	cleanup := func() {
 		defer sdl.Quit()
 		defer win.Destroy()

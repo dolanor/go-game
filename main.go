@@ -13,36 +13,22 @@ var projMat [4][4]float64
 var rotMat [3][3]float64
 var rotation float64
 var axis [3]float64
+var ent []object
 
 func init() {
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100) // correct
 	axis = vec3{0.5, 0.5, 0.5}
 	rotation = 0.005
 	rotMat = mathlib.RotationMat(0.01, axis)
+	ent = loadLevel("test")
 }
 
 const (
 	// WINW = Window Width
-	WINW = 800
+	WINW = 700
 	// WINH = Window Height
-	WINH = 600
+	WINH = 700
 )
-
-func initCube() (o object) {
-	o.dat = append(o.dat, tri{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}) // Sout
-	o.dat = append(o.dat, tri{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}})
-	o.dat = append(o.dat, tri{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}}) // East)
-	o.dat = append(o.dat, tri{{1, 0, 0}, {1, 1, 1}, {1, 0, 1}})
-	o.dat = append(o.dat, tri{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}) // North
-	o.dat = append(o.dat, tri{{1, 0, 1}, {0, 1, 1}, {0, 0, 1}})
-	o.dat = append(o.dat, tri{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}) // West
-	o.dat = append(o.dat, tri{{0, 0, 1}, {0, 1, 0}, {0, 0, 0}})
-	o.dat = append(o.dat, tri{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}}) // Top)
-	o.dat = append(o.dat, tri{{0, 1, 0}, {1, 1, 1}, {1, 1, 0}})
-	o.dat = append(o.dat, tri{{1, 0, 1}, {0, 0, 1}, {0, 0, 0}}) // Bottom)
-	o.dat = append(o.dat, tri{{1, 0, 1}, {0, 0, 0}, {1, 0, 0}})
-	return
-}
 
 func main() {
 	win, rdr, surf, cleanup := initSdl()
@@ -50,7 +36,7 @@ func main() {
 
 	surf.FillRect(nil, 0)
 	// init objects
-	cube := initCube()
+
 	timer := frametimer.Timer{}
 	win.UpdateSurface()
 
@@ -77,7 +63,9 @@ func main() {
 			}
 		}
 		// update
-		update(&cube)
+		for i := range ent {
+			ent[i].update(ent[i])
+		}
 		// draw
 		rect := sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
 		rdr.SetDrawColor(10, 200, 200, 100)
@@ -91,23 +79,6 @@ func main() {
 			fps := int(timer.CalcFPS())
 			win.SetTitle(strconv.Itoa(fps))
 		}
-	}
-}
-
-func update(o *object) {
-	// apply a rotation to each point
-	// tri is [3][3]float64
-	rotMat = mathlib.RotationMat(rotation, axis)
-	beforeCopy := o.dat[1][2][2]
-	for triIdx, tr := range o.dat {
-		for vertex := range tr {
-			result := mathlib.MultiplyMatVec3(rotMat, tr[vertex])
-			o.dat[triIdx][vertex] = result
-		}
-	}
-	afterCopy := o.dat[1][2][2]
-	if beforeCopy == afterCopy {
-		panic("rotation not applied")
 	}
 }
 
@@ -136,7 +107,7 @@ func calcObjectProjection(o *object) [][3][2]float64 {
 			var projTmp vec4
 			projTmp = vec4{tr[vertex][0], tr[vertex][1], tr[vertex][2], 1.0}
 			// multiply each 1x4 by the projMat and store the result
-			projTmp = mathlib.MultiplyMatByVec4(projMat, projTmp)
+			projTmp = mathlib.MultiplyMatVec4(projMat, projTmp)
 			projectedTri[vertex][0], projectedTri[vertex][1] = projTmp[0], projTmp[1]
 		}
 		//fmt.Printf("%10.6f %10.6f\n", projectedTri[2][0], projectedTri[2][1])

@@ -10,5 +10,6 @@ type material struct {
 type object struct {
 	dat    []tri
 	mat    material
-	update func()
+	update func(*object)
+	id     int64
 }

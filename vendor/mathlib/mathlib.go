@@ -19,14 +19,20 @@ func PerspectiveMat(fovy, aspect, near, far float64) [4][4]float64 {
 }
 
 // NormalizeVec3 returns version of vector that is unit length
-func NormalizeVec3(in [3][3]float64) (out [3][3]float64)
-{
-	return in
+func NormalizeVec3(in [3]float64) (out [3]float64) {
+	len := math.Sqrt(in[0]*in[0] + in[1]*in[1] + in[2]*in[2])
+	out[0], out[1], out[2] = in[0]/len, in[1]/len, in[2]/len
+	return
 }
 
 // CrossProductVec3 finds the vec3 orthogonal to two input vec3s
-func CrossProductVec3(a, b [3][3]float64) (c [3][3]float64) {
-	return c
+func CrossProductVec3(a, b [3]float64) (c [3]float64) {
+	return
+}
+
+// DotProductVec3 finds the dot product of two vec3s
+func DotProductVec3(a, b [3][3]float64) (c float64) {
+	return
 }
 
 // RotationMat returns a 3x3 rotation matrix with parameters
@@ -68,8 +74,8 @@ func MultiplyMat4414(a [4][4]float64, b [1][4]float64) (c [1][4]float64) {
 	return
 }
 
-// MultiplyMatByVec4 does [4][4] x vec4 -> vec4
-func MultiplyMatByVec4(a [4][4]float64, b [4]float64) (c [4]float64) {
+// MultiplyMatVec4 does [4][4] x vec4 -> vec4
+func MultiplyMatVec4(a [4][4]float64, b [4]float64) (c [4]float64) {
 	J, I := 4, 4
 	for j := 0; j < J; j++ {
 		for i := 0; i < I; i++ {
@@ -93,7 +99,7 @@ func MultiplyMat3313(a [3][3]float64, b [1][3]float64) (c [1][3]float64) {
 	return
 }
 
-// MultiplyMatByVec4 does [4][4] x vec4 -> vec4
+// MultiplyMatVec3 does [3][3] x vec3 -> vec3
 func MultiplyMatVec3(a [3][3]float64, b [3]float64) (c [3]float64) {
 	J, I := 3, 3
 	for j := 0; j < J; j++ {

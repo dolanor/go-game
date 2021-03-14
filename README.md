@@ -1,7 +1,6 @@
 Game type: Crash Bandicoot type game
 
 TODO
-build script with timing
 
 culling
 	create normals using cross product

@@ -1,7 +1,7 @@
 package main
 
 import (
-	//	"fmt"
+	"fmt"
 	"frametimer"
 	"go-sdl2/sdl"
 	"math"
@@ -11,16 +11,15 @@ import (
 
 var projMat [4][4]float64
 var rotMat [3][3]float64
-var rotation float64
 var axis [3]float64
 var ent []object
 
 func init() {
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100) // correct
 	axis = vec3{0.5, 0.5, 0.5}
-	rotation = 0.005
 	rotMat = mathlib.RotationMat(0.01, axis)
 	ent = loadLevel("test")
+	fmt.Println("entities:", ent)
 }
 
 const (
@@ -64,13 +63,15 @@ func main() {
 		}
 		// update
 		for i := range ent {
-			ent[i].update(ent[i])
+			ent[i].update(&ent[i])
 		}
 		// draw
 		rect := sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
 		rdr.SetDrawColor(10, 200, 200, 100)
 		rdr.FillRect(&rect)
-		draw(rdr, cube)
+		for i := range ent {
+			ent[i].draw(rdr, &ent[i])
+		}
 		rdr.Present()
 		delayMicro := timer.GetElapsedSinceLast()
 		delayToLimitFramerate(delayMicro)
@@ -79,20 +80,6 @@ func main() {
 			fps := int(timer.CalcFPS())
 			win.SetTitle(strconv.Itoa(fps))
 		}
-	}
-}
-
-func draw(rdr *sdl.Renderer, o object) {
-	oProjected := calcObjectProjection(&o)
-	for _, screenTri := range oProjected {
-		// scale
-		for i := 0; i < 3; i++ {
-			screenTri[i][0] += 0.4
-			screenTri[i][1] += 0.4
-			screenTri[i][0] *= 0.5 * WINW
-			screenTri[i][1] *= 0.5 * WINH
-		}
-		drawTriangle(rdr, &screenTri, &sdl.Color{100, 100, 100, 100})
 	}
 }
 
@@ -110,7 +97,6 @@ func calcObjectProjection(o *object) [][3][2]float64 {
 			projTmp = mathlib.MultiplyMatVec4(projMat, projTmp)
 			projectedTri[vertex][0], projectedTri[vertex][1] = projTmp[0], projTmp[1]
 		}
-		//fmt.Printf("%10.6f %10.6f\n", projectedTri[2][0], projectedTri[2][1])
 		projected = append(projected, projectedTri)
 	}
 	if len(projected) != len(o.dat) {

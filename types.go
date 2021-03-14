@@ -1,5 +1,7 @@
 package main
 
+import "go-sdl2/sdl"
+
 type tri = [3][3]float64
 type vec3 = [3]float64
 type vec4 = [4]float64
@@ -10,6 +12,8 @@ type material struct {
 type object struct {
 	dat    []tri
 	mat    material
+	pos    vec3
 	update func(*object)
+	draw   func(*sdl.Renderer, *object)
 	id     int64
 }

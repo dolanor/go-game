@@ -27,12 +27,15 @@ func NormalizeVec3(in [3]float64) (out [3]float64) {
 
 // CrossProductVec3 finds the vec3 orthogonal to two input vec3s
 func CrossProductVec3(a, b [3]float64) (c [3]float64) {
+	c[0] = a[1]*b[2] - a[2]*b[1]
+	c[1] = a[2]*b[0] - a[0]*b[2]
+	c[2] = a[0]*b[1] - a[1]*b[0]
 	return
 }
 
 // DotProductVec3 finds the dot product of two vec3s
-func DotProductVec3(a, b [3][3]float64) (c float64) {
-	return
+func DotProductVec3(a, b [3]float64) (c float64) {
+	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 }
 
 // RotationMat returns a 3x3 rotation matrix with parameters

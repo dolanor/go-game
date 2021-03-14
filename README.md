@@ -1,25 +1,27 @@
-design game engine that I am building
+Game type: Crash Bandicoot type game
+
+TODO
+build script with timing
 
 culling
 	create normals using cross product
 	check if normals are in camera direction using dot product 
+
 shade faces
 	check if normals are in light direction using dot product
 
 camera
 
 level system
-load object files
+	load object files
 
 input
-load levels
-	load objects
 
 animations
 audio
 
 camera options
-	third person
+	third person like crash bandicoot
 	
 modes like editor, pause, debug, level select
 

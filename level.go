@@ -1,17 +1,26 @@
 package main
 
 import (
+	"math"
 	"mathlib"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+var projMat [4][4]float64
+var rotMat [3][3]float64
+var axis [3]float64
+var camera vec3
+
 func loadLevel(name string) []object {
-	entities := []object{}
 	//dat := ioutil.ReadFile("/level/" + name + ".txt")
+	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
+	axis = vec3{0.5, 0.5, 0.5}
+	camera = vec3{0, 0, 0}
 	cube := initCube()
 	cube.update = cubeUpdate
 	cube.draw = cubeDraw
+	entities := []object{}
 	entities = append(entities, cube)
 	return entities
 }

@@ -2,24 +2,14 @@ package main
 
 import (
 	"frametimer"
-	"math"
-	"mathlib"
 	"strconv"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var projMat [4][4]float64
-var rotMat [3][3]float64
-var axis [3]float64
 var ent []object
-var camera vec3
 
 func init() {
-	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
-	axis = vec3{0.5, 0.5, 0.5}
-	camera = vec3{0, 0, 0}
-	rotMat = mathlib.RotationMat(0.01, axis)
 	ent = loadLevel("test")
 }
 

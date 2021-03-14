@@ -1,11 +1,10 @@
 design game engine that I am building
 
-level system
-possibly draw should just be a big switch statement
-input
 culling
-move camera
-texture objects
+shade faces
+camera
+level system
+input
 load levels
 	load objects
 animations

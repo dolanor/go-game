@@ -49,12 +49,30 @@ func cubeUpdate(o *object) {
 }
 
 func cubeDraw(rdr *sdl.Renderer, o *object) {
-	oProjected := calcObjectProjection(o)
-	for _, screenTri := range oProjected {
+	var projected [][3][2]float64
+	{
+		// o.dat is []tri
+		for _, tr := range o.dat {
+			var projectedTri [3][2]float64
+			for vertex := range tr {
+				var projTmp vec4
+				tr[vertex][2] += 2.0
+				// create 1x4 so we can multipy by the projMat
+				projTmp = vec4{tr[vertex][0], tr[vertex][1], tr[vertex][2], 1.0}
+				// multiply each 1x4 by the projMat
+				projTmp = mathlib.MultiplyMatVec4(projMat, projTmp)
+				// scale by z depth
+				projectedTri[vertex][0] = projTmp[0] / tr[vertex][2]
+				projectedTri[vertex][1] = projTmp[1] / tr[vertex][2]
+			}
+			projected = append(projected, projectedTri)
+		}
+	}
+	for _, screenTri := range projected {
 		// scale
 		for i := 0; i < 3; i++ {
-			screenTri[i][0] += 0.4
-			screenTri[i][1] += 0.4
+			screenTri[i][0] += 0.5
+			screenTri[i][1] += 0.5
 			screenTri[i][0] *= 0.5 * WINW
 			screenTri[i][1] *= 0.5 * WINH
 		}

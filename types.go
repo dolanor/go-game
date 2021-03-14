@@ -7,6 +7,7 @@ type vec3 = [3]float64
 type vec4 = [4]float64
 
 type material struct {
+	color sdl.Color
 }
 
 type object struct {

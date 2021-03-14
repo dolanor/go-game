@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"frametimer"
 	"go-sdl2/sdl"
 	"math"
@@ -13,24 +12,25 @@ var projMat [4][4]float64
 var rotMat [3][3]float64
 var axis [3]float64
 var ent []object
+var camera vec3
 
 func init() {
-	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100) // correct
+	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
 	axis = vec3{0.5, 0.5, 0.5}
+	camera = vec3{0, 0, 0}
 	rotMat = mathlib.RotationMat(0.01, axis)
 	ent = loadLevel("test")
-	fmt.Println("entities:", ent)
 }
 
 const (
 	// WINW = Window Width
-	WINW = 700
+	WINW = 600
 	// WINH = Window Height
-	WINH = 700
+	WINH = 600
 )
 
 func main() {
-	win, rdr, surf, cleanup := initSdl()
+	win, rdr, surf, cleanup := initSdl(WINW, WINH)
 	defer cleanup()
 
 	surf.FillRect(nil, 0)
@@ -81,26 +81,4 @@ func main() {
 			win.SetTitle(strconv.Itoa(fps))
 		}
 	}
-}
-
-// @TODO: Might want to clean up these temporaries for speed's sake
-func calcObjectProjection(o *object) [][3][2]float64 {
-	// o.dat is []tri
-	var projected [][3][2]float64
-	for _, tr := range o.dat {
-		// create three 1x4s so we can multipy by the projMat
-		var projectedTri [3][2]float64
-		for vertex := range tr {
-			var projTmp vec4
-			projTmp = vec4{tr[vertex][0], tr[vertex][1], tr[vertex][2], 1.0}
-			// multiply each 1x4 by the projMat and store the result
-			projTmp = mathlib.MultiplyMatVec4(projMat, projTmp)
-			projectedTri[vertex][0], projectedTri[vertex][1] = projTmp[0], projTmp[1]
-		}
-		projected = append(projected, projectedTri)
-	}
-	if len(projected) != len(o.dat) {
-		panic("projected != o.dat")
-	}
-	return projected
 }

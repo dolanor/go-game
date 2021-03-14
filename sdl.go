@@ -1,8 +1,10 @@
 package main
 
 import (
-	"go-sdl2/sdl"
 	"math"
+
+	"github.com/veandco/go-sdl2/gfx"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 func initSdl(width, height int32) (win *sdl.Window, rdr *sdl.Renderer, surf *sdl.Surface, cleanupFunc func()) {
@@ -38,11 +40,19 @@ func drawTriangle(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
 		panic(err)
 	}
 	rdr.SetDrawColor(color.R, color.G, color.B, color.A)
-	rdr.DrawLine(int32(math.Round(tri2d[0][0])), int32(math.Round(tri2d[0][1])),
-		int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1])))
-	rdr.DrawLine(int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1])),
-		int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1])))
-	rdr.DrawLine(int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1])),
-		int32(math.Round(tri2d[0][0])), int32(math.Round(tri2d[0][1])))
+	// convert coordinates to rounded integers
+	var tri2dInt [3][2]int32
+	tri2dInt[0] = [2]int32{int32(math.Round(tri2d[0][0])), int32(math.Round(tri2d[0][1]))}
+	tri2dInt[1] = [2]int32{int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1]))}
+	tri2dInt[2] = [2]int32{int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1]))}
+	// draw triangle outline
+	rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
+	rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
+	rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])
+	gfx.FilledTrigonRGBA(rdr, tri2dInt[0][0], tri2dInt[0][1],
+		tri2dInt[1][0], tri2dInt[1][1],
+		tri2dInt[2][0], tri2dInt[2][1], color.R, color.G, color.B, color.A)
+	// shade triangle faces
+	// change back to previous color
 	rdr.SetDrawColor(r, g, b, a)
 }

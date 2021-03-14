@@ -1,5 +1,6 @@
 design game engine that I am building
 
+draw filled triangles
 culling
 shade faces
 camera

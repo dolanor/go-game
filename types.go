@@ -1,6 +1,6 @@
 package main
 
-import "go-sdl2/sdl"
+import "github.com/veandco/go-sdl2/sdl"
 
 type tri = [3][3]float64
 type vec3 = [3]float64

@@ -2,10 +2,11 @@ package main
 
 import (
 	"frametimer"
-	"go-sdl2/sdl"
 	"math"
 	"mathlib"
 	"strconv"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 var projMat [4][4]float64

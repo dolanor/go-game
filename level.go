@@ -1,8 +1,9 @@
 package main
 
 import (
-	"go-sdl2/sdl"
 	"mathlib"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 func loadLevel(name string) []object {

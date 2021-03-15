@@ -7,8 +7,6 @@ import (
 	"go-sdl2/sdl"
 )
 
-var ent []object
-
 //var levelList []string
 
 func init() {
@@ -22,15 +20,21 @@ const (
 	WINH = 600
 )
 
+var (
+	// screenRect is the screenRectangle
+	screenRect sdl.Rect
+	// ent is the entity vector
+	ent []object
+)
+
 func main() {
-	win, rdr, surf, cleanup := initSdl(WINW, WINH)
-	defer cleanup()
-
-	surf.FillRect(nil, 0)
 	// init objects
-
+	win, rdr, _, cleanup := initSdl(WINW, WINH)
+	defer cleanup()
 	timer := frametimer.Timer{}
-	win.UpdateSurface()
+	screenRect = sdl.Rect{0, 0, WINW, WINH}
+	clearScreen(rdr)
+	rdr.Present()
 
 	running := true
 	timer.RecordTime()
@@ -59,9 +63,7 @@ func main() {
 			ent[i].update(&ent[i])
 		}
 		// draw
-		rect := sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
-		rdr.SetDrawColor(10, 200, 200, 100)
-		rdr.FillRect(&rect)
+		clearScreen(rdr)
 		for i := range ent {
 			ent[i].draw(rdr, &ent[i])
 		}

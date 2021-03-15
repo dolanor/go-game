@@ -25,6 +25,14 @@ func NormalizeVec3(in [3]float64) (out [3]float64) {
 	return
 }
 
+// DistVec3 calcs the distance between two vec3
+func DistVec3(a, b [3]float64) (c float64) {
+	c = math.Sqrt(math.Pow(a[0]-b[0], 2) +
+		math.Pow(a[1]-b[1], 2) +
+		math.Pow(a[2]-b[2], 2))
+	return
+}
+
 // AddVec3 adds two vectors together to product a resultant vector
 func AddVec3(a, b [3]float64) (c [3]float64) {
 	c[0] = a[0] + b[0]

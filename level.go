@@ -4,6 +4,7 @@ import (
 	//	"fmt"
 	"math"
 	"mathlib"
+	"sort"
 
 	"go-sdl2/gfx"
 	"go-sdl2/sdl"
@@ -70,7 +71,18 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 		// calc distance from camera to midpoint
 		// draw farthest triangles first
 		// o.dat is []tri
+		// sort o.dat by midpoint
+
+		sort.SliceStable(o.dat, func(i, j int) bool {
+			imid := mathlib.MidpointTri(o.dat[i].vert)
+			jmid := mathlib.MidpointTri(o.dat[j].vert)
+			idistToCamera := mathlib.DistVec3(imid, camera)
+			jdistToCamera := mathlib.DistVec3(jmid, camera)
+			return idistToCamera > jdistToCamera
+		})
+
 		for trIdx, tr := range o.dat {
+
 			// calculate normal
 			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr.vert[1], tr.vert[0]),
 				mathlib.SubtrVec3(tr.vert[2], tr.vert[0]))

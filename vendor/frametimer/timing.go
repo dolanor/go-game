@@ -1,6 +1,7 @@
 package frametimer
 
 import (
+	"go-sdl2/sdl"
 	"time"
 )
 
@@ -19,6 +20,14 @@ type Timer struct {
 //and resets the timer. It also increments the TotalFrames
 //and the TotalTime the timer has been running.
 func (ft *Timer) RecordTime() int64 {
+	// delay to cap the framerate
+	frametime := ft.GetElapsedSinceLast()
+	pauseTime := float64(16_333 - frametime)
+	if pauseTime > 0 {
+		delayMilli := uint32(pauseTime / 1_000)
+		sdl.Delay(delayMilli)
+	}
+	// officially record frame time
 	ft.times[ft.index] = ft.GetElapsedSinceLast()
 	returnVal := ft.times[ft.index]
 	ft.lastTime = time.Now()
@@ -32,7 +41,7 @@ func (ft *Timer) RecordTime() int64 {
 	return returnVal
 }
 
-// GetElasedSinceLast returns the microseconds
+// GetElapsedSinceLast returns the microseconds
 // since the lastTime time point.
 func (ft *Timer) GetElapsedSinceLast() int64 {
 	return time.Since(ft.lastTime).Microseconds()

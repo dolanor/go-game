@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"mathlib"
 
+	"go-sdl2/gfx"
 	"go-sdl2/sdl"
 )
 
@@ -78,8 +80,9 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			normal = mathlib.NormalizeVec3(normal)
 			camera = mathlib.NormalizeVec3(camera)
 			light = mathlib.NormalizeVec3(light)
-			// @TODO: check these normals by drawing them
+			fmt.Println("normal, camera, light", normal, camera, light)
 
+			// @TODO: check these normals by drawing them
 			similarityToCamera := mathlib.DotProductVec3(normal, camera)
 			if similarityToCamera < 0 {
 				o.visible[trIdx] = true
@@ -93,7 +96,6 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			} else {
 				o.light[trIdx] = 0
 			}
-			// calculate similarity of normal to light
 
 			var projectedTri [3][2]float64
 			for vertex := range tr {
@@ -122,4 +124,27 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			drawTriangle(rdr, &screenTri, &sdl.Color{R: o.light[i], G: 100, B: 100, A: 100})
 		}
 	}
+}
+
+func drawTriangle(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
+	r, g, b, a, err := rdr.GetDrawColor() // get previous draw color
+	if err != nil {
+		panic(err)
+	}
+	rdr.SetDrawColor(color.R, color.G, color.B, color.A)
+	// convert coordinates to rounded integers
+	var tri2dInt [3][2]int32
+	tri2dInt[0] = [2]int32{int32(math.Round(tri2d[0][0])), int32(math.Round(tri2d[0][1]))}
+	tri2dInt[1] = [2]int32{int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1]))}
+	tri2dInt[2] = [2]int32{int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1]))}
+	// draw triangle outline
+	rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
+	rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
+	rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])
+	gfx.FilledTrigonRGBA(rdr, tri2dInt[0][0], tri2dInt[0][1],
+		tri2dInt[1][0], tri2dInt[1][1],
+		tri2dInt[2][0], tri2dInt[2][1], color.R, color.G, color.B, color.A)
+	// shade triangle faces
+	// change back to previous color
+	rdr.SetDrawColor(r, g, b, a)
 }

@@ -8,8 +8,10 @@ culling
 
 shade faces
 	check if normals are in light direction using dot product
+	one face being drawn that either shouldn't be or should be 
+	drawn later
 
-camera
+move camera
 
 level system
 	load object files

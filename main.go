@@ -66,8 +66,6 @@ func main() {
 			ent[i].draw(rdr, &ent[i])
 		}
 		rdr.Present()
-		delayMicro := timer.GetElapsedSinceLast()
-		delayToLimitFramerate(delayMicro)
 		_ = timer.RecordTime()
 		if timer.TotalFrames%50 == 0 {
 			fps := int(timer.CalcFPS())

@@ -17,8 +17,8 @@ func loadLevel(name string) []object {
 	//dat := ioutil.ReadFile("/level/" + name + ".txt")
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
 	axis = vec3{0.5, 0.5, 0.5}
-	camera = vec3{0.5, 0.5, 0.5}
-	light = vec3{0, 0, -1}
+	camera = vec3{0, 0, 0.5}
+	light = vec3{0, 0, +1}
 	cube := initCube()
 	cube.update = cubeUpdate
 	cube.draw = cubeDraw
@@ -63,20 +63,33 @@ func cubeUpdate(o *object) {
 func cubeDraw(rdr *sdl.Renderer, o *object) {
 	numTris := len(o.dat)
 	if len(o.light) < numTris {
-		o.light = make([]uint8, len(o.dat))
+		o.light = make([]uint8, numTris)
+	}
+	if len(o.visible) < numTris {
+		o.visible = make([]bool, numTris)
 	}
 	var projected [][3][2]float64
 	{
 		// o.dat is []tri
 		for trIdx, tr := range o.dat {
 			// calculate normal
-			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr[0], tr[1]),
-				mathlib.SubtrVec3(tr[0], tr[2]))
+			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr[1], tr[0]),
+				mathlib.SubtrVec3(tr[2], tr[0]))
 			normal = mathlib.NormalizeVec3(normal)
+			camera = mathlib.NormalizeVec3(camera)
+			light = mathlib.NormalizeVec3(light)
+			// @TODO: check these normals by drawing them
+
+			similarityToCamera := mathlib.DotProductVec3(normal, camera)
+			if similarityToCamera < 0 {
+				o.visible[trIdx] = true
+			} else {
+				o.visible[trIdx] = false
+			}
 			// calculate whether normal <= 90 degrees with camera
 			similarityToLight := mathlib.DotProductVec3(normal, light)
-			if similarityToLight > 0 {
-				o.light[trIdx] = uint8(similarityToLight * 255)
+			if similarityToLight < 0 {
+				o.light[trIdx] = uint8(-similarityToLight * 255)
 			} else {
 				o.light[trIdx] = 0
 			}
@@ -105,6 +118,8 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			screenTri[i][0] *= 0.5 * WINW
 			screenTri[i][1] *= 0.5 * WINH
 		}
-		drawTriangle(rdr, &screenTri, &sdl.Color{R: o.light[i], G: 100, B: 100, A: 100})
+		if o.visible[i] {
+			drawTriangle(rdr, &screenTri, &sdl.Color{R: o.light[i], G: 100, B: 100, A: 100})
+		}
 	}
 }

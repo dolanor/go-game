@@ -11,11 +11,12 @@ type material struct {
 }
 
 type object struct {
-	dat    []tri
-	light  []uint8
-	mat    material
-	pos    vec3
-	update func(*object)
-	draw   func(*sdl.Renderer, *object)
-	id     int64
+	dat     []tri
+	light   []uint8
+	visible []bool
+	mat     material
+	pos     vec3
+	update  func(*object)
+	draw    func(*sdl.Renderer, *object)
+	id      int64
 }

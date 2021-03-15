@@ -50,16 +50,11 @@ func cubeUpdate(o *object) {
 	// apply a rotation to each point
 	// tri is [3][3]float64
 	rotMat = mathlib.RotationMat(0.01, axis)
-	beforeCopy := o.dat[1].vert[2][2]
 	for triIdx, tr := range o.dat {
 		for vertex := range tr.vert {
 			result := mathlib.MultiplyMatVec3(rotMat, tr.vert[vertex])
 			o.dat[triIdx].vert[vertex] = result
 		}
-	}
-	afterCopy := o.dat[1].vert[2][2]
-	if beforeCopy == afterCopy {
-		panic("rotation not applied")
 	}
 }
 
@@ -78,7 +73,7 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			jmid := mathlib.MidpointTri(o.dat[j].vert)
 			idistToCamera := mathlib.DistVec3(imid, camera)
 			jdistToCamera := mathlib.DistVec3(jmid, camera)
-			return idistToCamera > jdistToCamera
+			return idistToCamera < jdistToCamera
 		})
 
 		for trIdx, tr := range o.dat {

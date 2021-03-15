@@ -4,19 +4,21 @@ import (
 	"math"
 	"mathlib"
 
-	"github.com/veandco/go-sdl2/sdl"
+	"go-sdl2/sdl"
 )
 
 var projMat [4][4]float64
 var rotMat [3][3]float64
 var axis [3]float64
 var camera vec3
+var light vec3
 
 func loadLevel(name string) []object {
 	//dat := ioutil.ReadFile("/level/" + name + ".txt")
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
 	axis = vec3{0.5, 0.5, 0.5}
-	camera = vec3{0, 0, 0}
+	camera = vec3{0.5, 0.5, 0.5}
+	light = vec3{0, 0, -1}
 	cube := initCube()
 	cube.update = cubeUpdate
 	cube.draw = cubeDraw
@@ -59,10 +61,27 @@ func cubeUpdate(o *object) {
 }
 
 func cubeDraw(rdr *sdl.Renderer, o *object) {
+	numTris := len(o.dat)
+	if len(o.light) < numTris {
+		o.light = make([]uint8, len(o.dat))
+	}
 	var projected [][3][2]float64
 	{
 		// o.dat is []tri
-		for _, tr := range o.dat {
+		for trIdx, tr := range o.dat {
+			// calculate normal
+			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr[0], tr[1]),
+				mathlib.SubtrVec3(tr[0], tr[2]))
+			normal = mathlib.NormalizeVec3(normal)
+			// calculate whether normal <= 90 degrees with camera
+			similarityToLight := mathlib.DotProductVec3(normal, light)
+			if similarityToLight > 0 {
+				o.light[trIdx] = uint8(similarityToLight * 255)
+			} else {
+				o.light[trIdx] = 0
+			}
+			// calculate similarity of normal to light
+
 			var projectedTri [3][2]float64
 			for vertex := range tr {
 				var projTmp vec4
@@ -78,7 +97,7 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			projected = append(projected, projectedTri)
 		}
 	}
-	for _, screenTri := range projected {
+	for i, screenTri := range projected {
 		// scale
 		for i := 0; i < 3; i++ {
 			screenTri[i][0] += 0.5
@@ -86,6 +105,6 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			screenTri[i][0] *= 0.5 * WINW
 			screenTri[i][1] *= 0.5 * WINH
 		}
-		drawTriangle(rdr, &screenTri, &sdl.Color{100, 100, 100, 100})
+		drawTriangle(rdr, &screenTri, &sdl.Color{R: o.light[i], G: 100, B: 100, A: 100})
 	}
 }

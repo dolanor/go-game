@@ -3,8 +3,8 @@ package main
 import (
 	"math"
 
-	"github.com/veandco/go-sdl2/gfx"
-	"github.com/veandco/go-sdl2/sdl"
+	"go-sdl2/gfx"
+	"go-sdl2/sdl"
 )
 
 func initSdl(width, height int32) (win *sdl.Window, rdr *sdl.Renderer, surf *sdl.Surface, cleanupFunc func()) {

@@ -4,10 +4,12 @@ import (
 	"frametimer"
 	"strconv"
 
-	"github.com/veandco/go-sdl2/sdl"
+	"go-sdl2/sdl"
 )
 
 var ent []object
+
+//var levelList []string
 
 func init() {
 	ent = loadLevel("test")

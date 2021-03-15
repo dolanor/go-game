@@ -1,6 +1,6 @@
 package main
 
-import "github.com/veandco/go-sdl2/sdl"
+import "go-sdl2/sdl"
 
 type tri = [3][3]float64
 type vec3 = [3]float64
@@ -12,6 +12,7 @@ type material struct {
 
 type object struct {
 	dat    []tri
+	light  []uint8
 	mat    material
 	pos    vec3
 	update func(*object)

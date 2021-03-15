@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//	"fmt"
 	"math"
 	"mathlib"
 
@@ -19,7 +19,7 @@ func loadLevel(name string) []object {
 	//dat := ioutil.ReadFile("/level/" + name + ".txt")
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
 	axis = vec3{0.5, 0.5, 0.5}
-	camera = vec3{0, 0, 0.5}
+	camera = vec3{0, 0, +1}
 	light = vec3{0, 0, +1}
 	cube := initCube()
 	cube.update = cubeUpdate
@@ -30,18 +30,18 @@ func loadLevel(name string) []object {
 }
 
 func initCube() (o object) {
-	o.dat = append(o.dat, tri{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}) // Sout
-	o.dat = append(o.dat, tri{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}})
-	o.dat = append(o.dat, tri{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}}) // East)
-	o.dat = append(o.dat, tri{{1, 0, 0}, {1, 1, 1}, {1, 0, 1}})
-	o.dat = append(o.dat, tri{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}) // North
-	o.dat = append(o.dat, tri{{1, 0, 1}, {0, 1, 1}, {0, 0, 1}})
-	o.dat = append(o.dat, tri{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}) // West
-	o.dat = append(o.dat, tri{{0, 0, 1}, {0, 1, 0}, {0, 0, 0}})
-	o.dat = append(o.dat, tri{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}}) // Top)
-	o.dat = append(o.dat, tri{{0, 1, 0}, {1, 1, 1}, {1, 1, 0}})
-	o.dat = append(o.dat, tri{{1, 0, 1}, {0, 0, 1}, {0, 0, 0}}) // Bottom)
-	o.dat = append(o.dat, tri{{1, 0, 1}, {0, 0, 0}, {1, 0, 0}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 0}, {1, 1, 1}, {1, 0, 1}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {0, 1, 1}, {0, 0, 1}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 1}, {0, 1, 0}, {0, 0, 0}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 1, 0}, {1, 1, 1}, {1, 1, 0}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {0, 0, 1}, {0, 0, 0}}})
+	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {0, 0, 0}, {1, 0, 0}}})
 	return
 }
 
@@ -49,65 +49,62 @@ func cubeUpdate(o *object) {
 	// apply a rotation to each point
 	// tri is [3][3]float64
 	rotMat = mathlib.RotationMat(0.01, axis)
-	beforeCopy := o.dat[1][2][2]
+	beforeCopy := o.dat[1].vert[2][2]
 	for triIdx, tr := range o.dat {
-		for vertex := range tr {
-			result := mathlib.MultiplyMatVec3(rotMat, tr[vertex])
-			o.dat[triIdx][vertex] = result
+		for vertex := range tr.vert {
+			result := mathlib.MultiplyMatVec3(rotMat, tr.vert[vertex])
+			o.dat[triIdx].vert[vertex] = result
 		}
 	}
-	afterCopy := o.dat[1][2][2]
+	afterCopy := o.dat[1].vert[2][2]
 	if beforeCopy == afterCopy {
 		panic("rotation not applied")
 	}
 }
 
 func cubeDraw(rdr *sdl.Renderer, o *object) {
-	numTris := len(o.dat)
-	if len(o.light) < numTris {
-		o.light = make([]uint8, numTris)
-	}
-	if len(o.visible) < numTris {
-		o.visible = make([]bool, numTris)
-	}
 	var projected [][3][2]float64
 	{
+		// sort o.dat ( []tri ) by distance of midpoint to camera
+		// calculate triangle midpoint
+		// calc distance from camera to midpoint
+		// draw farthest triangles first
 		// o.dat is []tri
 		for trIdx, tr := range o.dat {
 			// calculate normal
-			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr[1], tr[0]),
-				mathlib.SubtrVec3(tr[2], tr[0]))
+			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr.vert[1], tr.vert[0]),
+				mathlib.SubtrVec3(tr.vert[2], tr.vert[0]))
 			normal = mathlib.NormalizeVec3(normal)
 			camera = mathlib.NormalizeVec3(camera)
 			light = mathlib.NormalizeVec3(light)
-			fmt.Println("normal, camera, light", normal, camera, light)
+			//fmt.Println("normal, camera, light", normal, camera, light)
 
 			// @TODO: check these normals by drawing them
 			similarityToCamera := mathlib.DotProductVec3(normal, camera)
 			if similarityToCamera < 0 {
-				o.visible[trIdx] = true
+				o.dat[trIdx].visible = true
 			} else {
-				o.visible[trIdx] = false
+				o.dat[trIdx].visible = false
 			}
 			// calculate whether normal <= 90 degrees with camera
 			similarityToLight := mathlib.DotProductVec3(normal, light)
 			if similarityToLight < 0 {
-				o.light[trIdx] = uint8(-similarityToLight * 255)
+				o.dat[trIdx].shade = uint8(-similarityToLight * 255)
 			} else {
-				o.light[trIdx] = 0
+				o.dat[trIdx].shade = 0
 			}
 
 			var projectedTri [3][2]float64
-			for vertex := range tr {
+			for vertex := range tr.vert {
 				var projTmp vec4
-				tr[vertex][2] += 2.0
+				tr.vert[vertex][2] += 2.0
 				// create 1x4 so we can multipy by the projMat
-				projTmp = vec4{tr[vertex][0], tr[vertex][1], tr[vertex][2], 1.0}
+				projTmp = vec4{tr.vert[vertex][0], tr.vert[vertex][1], tr.vert[vertex][2], 1.0}
 				// multiply each 1x4 by the projMat
 				projTmp = mathlib.MultiplyMatVec4(projMat, projTmp)
 				// scale by z depth
-				projectedTri[vertex][0] = projTmp[0] / tr[vertex][2]
-				projectedTri[vertex][1] = projTmp[1] / tr[vertex][2]
+				projectedTri[vertex][0] = projTmp[0] / tr.vert[vertex][2]
+				projectedTri[vertex][1] = projTmp[1] / tr.vert[vertex][2]
 			}
 			projected = append(projected, projectedTri)
 		}
@@ -120,8 +117,8 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			screenTri[i][0] *= 0.5 * WINW
 			screenTri[i][1] *= 0.5 * WINH
 		}
-		if o.visible[i] {
-			drawTriangle(rdr, &screenTri, &sdl.Color{R: o.light[i], G: 100, B: 100, A: 100})
+		if o.dat[i].visible {
+			drawTriangle(rdr, &screenTri, &sdl.Color{R: o.dat[i].shade, G: 100, B: 100, A: 255})
 		}
 	}
 }
@@ -131,16 +128,18 @@ func drawTriangle(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
 	if err != nil {
 		panic(err)
 	}
-	rdr.SetDrawColor(color.R, color.G, color.B, color.A)
 	// convert coordinates to rounded integers
 	var tri2dInt [3][2]int32
 	tri2dInt[0] = [2]int32{int32(math.Round(tri2d[0][0])), int32(math.Round(tri2d[0][1]))}
 	tri2dInt[1] = [2]int32{int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1]))}
 	tri2dInt[2] = [2]int32{int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1]))}
-	// draw triangle outline
+	// draw wireframe
+	rdr.SetDrawColor(100, 100, 100, 255)
 	rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
 	rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
 	rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])
+
+	rdr.SetDrawColor(color.R, color.G, color.B, color.A)
 	gfx.FilledTrigonRGBA(rdr, tri2dInt[0][0], tri2dInt[0][1],
 		tri2dInt[1][0], tri2dInt[1][1],
 		tri2dInt[2][0], tri2dInt[2][1], color.R, color.G, color.B, color.A)

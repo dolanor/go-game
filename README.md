@@ -3,8 +3,8 @@ Game type: Crash Bandicoot type game
 TODO
 
 culling
-	create normals using cross product
-	check if normals are in camera direction using dot product 
+	add data to triangle object
+	sort triangles based on midpoint and draw them back to front
 
 shade faces
 	check if normals are in light direction using dot product

@@ -24,6 +24,6 @@ func initSdl(width, height int32) (win *sdl.Window, rdr *sdl.Renderer, surf *sdl
 }
 
 func clearScreen(rdr *sdl.Renderer) {
-	rdr.SetDrawColor(10, 200, 200, 100)
+	rdr.SetDrawColor(10, 200, 200, 255)
 	rdr.FillRect(&screenRect)
 }

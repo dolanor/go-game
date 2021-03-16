@@ -1,7 +1,6 @@
 package main
 
 import (
-	//	"fmt"
 	"math"
 	"mathlib"
 	"sort"
@@ -20,11 +19,11 @@ func loadLevel(name string) []object {
 	//dat := ioutil.ReadFile("/level/" + name + ".txt")
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
 	axis = vec3{0.5, 0.5, 0.5}
-	camera = vec3{0, 0, +1}
-	light = vec3{0, 0, +1}
+	camera = vec3{0, 0.0, +1}
+	light = vec3{0, 0, 1}
 	cube := initCube()
 	cube.update = cubeUpdate
-	cube.draw = cubeDraw
+	cube.draw = drawObject
 	entities := []object{}
 	entities = append(entities, cube)
 	return entities
@@ -49,7 +48,7 @@ func initCube() (o object) {
 func cubeUpdate(o *object) {
 	// apply a rotation to each point
 	// tri is [3][3]float64
-	rotMat = mathlib.RotationMat(0.01, axis)
+	rotMat = mathlib.RotationMat(0.0095, axis)
 	for triIdx, tr := range o.dat {
 		for vertex := range tr.vert {
 			result := mathlib.MultiplyMatVec3(rotMat, tr.vert[vertex])
@@ -58,22 +57,16 @@ func cubeUpdate(o *object) {
 	}
 }
 
-func cubeDraw(rdr *sdl.Renderer, o *object) {
-	var projected [][3][2]float64
+func drawObject(rdr *sdl.Renderer, o *object) {
+	var projectedTriangles [][3][2]float64
 	{
 		// sort o.dat ( []tri ) by distance of midpoint to camera
-		// calculate triangle midpoint
-		// calc distance from camera to midpoint
-		// draw farthest triangles first
-		// o.dat is []tri
-		// sort o.dat by midpoint
-
 		sort.SliceStable(o.dat, func(i, j int) bool {
 			imid := mathlib.MidpointTri(o.dat[i].vert)
 			jmid := mathlib.MidpointTri(o.dat[j].vert)
 			idistToCamera := mathlib.DistVec3(imid, camera)
 			jdistToCamera := mathlib.DistVec3(jmid, camera)
-			return idistToCamera < jdistToCamera
+			return idistToCamera > jdistToCamera
 		})
 
 		for trIdx, tr := range o.dat {
@@ -104,7 +97,7 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 			var projectedTri [3][2]float64
 			for vertex := range tr.vert {
 				var projTmp vec4
-				tr.vert[vertex][2] += 2.0
+				tr.vert[vertex][2] += 3.0
 				// create 1x4 so we can multipy by the projMat
 				projTmp = vec4{tr.vert[vertex][0], tr.vert[vertex][1], tr.vert[vertex][2], 1.0}
 				// multiply each 1x4 by the projMat
@@ -113,10 +106,10 @@ func cubeDraw(rdr *sdl.Renderer, o *object) {
 				projectedTri[vertex][0] = projTmp[0] / tr.vert[vertex][2]
 				projectedTri[vertex][1] = projTmp[1] / tr.vert[vertex][2]
 			}
-			projected = append(projected, projectedTri)
+			projectedTriangles = append(projectedTriangles, projectedTri)
 		}
 	}
-	for i, screenTri := range projected {
+	for i, screenTri := range projectedTriangles {
 		// scale
 		for i := 0; i < 3; i++ {
 			screenTri[i][0] += 0.5
@@ -141,7 +134,7 @@ func drawTriangle(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
 	tri2dInt[1] = [2]int32{int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1]))}
 	tri2dInt[2] = [2]int32{int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1]))}
 	// draw wireframe
-	rdr.SetDrawColor(100, 100, 100, 255)
+	rdr.SetDrawColor(255, 255, 255, 255)
 	rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
 	rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
 	rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])

@@ -32,7 +32,7 @@ func main() {
 	win, rdr, _, cleanup := initSdl(WINW, WINH)
 	defer cleanup()
 	timer := frametimer.Timer{}
-	screenRect = sdl.Rect{0, 0, WINW, WINH}
+	screenRect = sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
 	clearScreen(rdr)
 	rdr.Present()
 

@@ -51,13 +51,9 @@ func SubtrVec3(a, b [3]float64) (c [3]float64) {
 
 // MidpointTri finds midpoint of triangle
 func MidpointTri(a [3][3]float64) (c [3]float64) {
-	c[0] = (a[0][0] + a[1][0]) / 2
-	c[1] = (a[0][1] + a[1][1]) / 2
-	c[2] = (a[0][2] + a[1][2]) / 2
-
-	c[0] = (a[2][0] + c[0]) / 2
-	c[1] = (a[2][1] + c[1]) / 2
-	c[2] = (a[2][2] + c[2]) / 2
+	c[0] = (a[0][0] + a[1][0] + a[2][0]) / 3
+	c[0] = (a[0][1] + a[1][1] + a[2][1]) / 3
+	c[0] = (a[0][2] + a[1][2] + a[2][2]) / 3
 	return
 }
 

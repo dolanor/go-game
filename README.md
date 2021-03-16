@@ -2,19 +2,11 @@ Game type: Crash Bandicoot type game
 
 TODO
 
-culling
-	add data to triangle object
-	sort triangles based on midpoint and draw them back to front
-
-shade faces
-	check if normals are in light direction using dot product
-	one face being drawn that either shouldn't be or should be 
-	drawn later
-
-move camera
+ability to move camera
 
 level system
-	load object files
+
+load object files
 
 input
 

@@ -69,6 +69,7 @@ func main() {
 		}
 		rdr.Present()
 		_ = timer.RecordTime()
+
 		if timer.TotalFrames%50 == 0 {
 			fps := int(timer.CalcFPS())
 			win.SetTitle(strconv.Itoa(fps))

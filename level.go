@@ -118,12 +118,13 @@ func drawObject(rdr *sdl.Renderer, o *object) {
 			screenTri[i][1] *= 0.5 * WINH
 		}
 		if o.dat[i].visible {
-			drawTriangle(rdr, &screenTri, &sdl.Color{R: o.dat[i].shade, G: 100, B: 100, A: 255})
+			// shade triangle faces
+			RenderProjectedTri(rdr, &screenTri, &sdl.Color{R: o.dat[i].shade, G: 100, B: 100, A: 255})
 		}
 	}
 }
 
-func drawTriangle(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
+func RenderProjectedTri(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
 	r, g, b, a, err := rdr.GetDrawColor() // get previous draw color
 	if err != nil {
 		panic(err)
@@ -133,17 +134,17 @@ func drawTriangle(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
 	tri2dInt[0] = [2]int32{int32(math.Round(tri2d[0][0])), int32(math.Round(tri2d[0][1]))}
 	tri2dInt[1] = [2]int32{int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1]))}
 	tri2dInt[2] = [2]int32{int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1]))}
+
 	// draw wireframe
 	rdr.SetDrawColor(255, 255, 255, 255)
 	rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
 	rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
 	rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])
-
+	// draw filled triangle
 	rdr.SetDrawColor(color.R, color.G, color.B, color.A)
 	gfx.FilledTrigonRGBA(rdr, tri2dInt[0][0], tri2dInt[0][1],
 		tri2dInt[1][0], tri2dInt[1][1],
 		tri2dInt[2][0], tri2dInt[2][1], color.R, color.G, color.B, color.A)
-	// shade triangle faces
 	// change back to previous color
 	rdr.SetDrawColor(r, g, b, a)
 }

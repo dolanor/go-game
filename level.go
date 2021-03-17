@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"math"
 	"mathlib"
+	"os"
 	"sort"
 
 	"go-sdl2/gfx"
@@ -29,6 +32,25 @@ func loadLevel(name string) []object {
 	return entities
 }
 
+// newObjectFromFile loads the triangle vertices of a .obj file
+// # is a comment
+// v is a vertex position
+// vn is a normal
+// vt is a texture coordinate
+func newObjectFromFile(name string) (o object, e error) {
+	// verify that file exists
+	fname := "/objects/" + name + ".obj"
+	if _, e = os.Stat(fname); os.IsNotExist(e) {
+		fmt.Printf("file %v does not exist\n", fname)
+		return o, e
+	}
+	dat, e := ioutil.ReadFile(fname)
+	if e != nil {
+		panic(e)
+	}
+	return
+}
+
 func initCube() (o object) {
 	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}})
 	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}}})
@@ -49,6 +71,7 @@ func cubeUpdate(o *object) {
 	// apply a rotation to each point
 	// tri is [3][3]float64
 	rotMat = mathlib.RotationMat(0.0095, axis)
+
 	for triIdx, tr := range o.dat {
 		for vertex := range tr.vert {
 			result := mathlib.MultiplyMatVec3(rotMat, tr.vert[vertex])
@@ -124,6 +147,7 @@ func drawObject(rdr *sdl.Renderer, o *object) {
 	}
 }
 
+// RenderProjectedTri draws a 2d triangle
 func RenderProjectedTri(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Color) {
 	r, g, b, a, err := rdr.GetDrawColor() // get previous draw color
 	if err != nil {

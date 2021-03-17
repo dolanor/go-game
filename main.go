@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"frametimer"
 	"strconv"
 
@@ -31,18 +32,18 @@ func main() {
 	// init objects
 	win, rdr, _, cleanup := initSdl(WINW, WINH)
 	defer cleanup()
+	printRenderInfo(rdr)
 	timer := frametimer.Timer{}
 	screenRect = sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
 	clearScreen(rdr)
 	rdr.Present()
-
 	running := true
 	timer.RecordTime()
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
 			case *sdl.QuitEvent:
-				println("Quit")
+				fmt.Println("Quit")
 				running = false
 			case *sdl.KeyboardEvent:
 				if event.GetType() == sdl.KEYDOWN {

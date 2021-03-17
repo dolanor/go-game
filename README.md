@@ -2,11 +2,12 @@ Game type: Crash Bandicoot type game
 
 TODO
 
+load object files
+
 ability to move camera
 
 level system
 
-load object files
 
 input
 

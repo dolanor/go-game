@@ -48,6 +48,7 @@ func newObjectFromFile(name string) (o object, e error) {
 	if e != nil {
 		panic(e)
 	}
+	fmt.Printf("read in %v bytes from %v\n", fname, len(dat))
 	return
 }
 

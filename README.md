@@ -1,6 +1,4 @@
-Game type: Crash Bandicoot type game
-
-TODO
+Game type: Crash Bandicoot type game or not
 
 load object files
 
@@ -8,14 +6,15 @@ ability to move camera
 
 level system
 
-
+movement set
 input
 
 animations
+
 audio
 
 camera options
-	third person like crash bandicoot
+	third person 
 	
 modes like editor, pause, debug, level select
 

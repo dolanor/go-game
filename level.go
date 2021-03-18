@@ -8,6 +8,7 @@ import (
 	"mathlib"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 
 	"go-sdl2/gfx"
@@ -30,7 +31,6 @@ func loadLevel(name string) []object {
 	obj, err := newObjectFromFile("icosphere")
 	if err != nil {
 		panic(err)
-		os.Exit(1)
 	}
 	obj.update = cubeUpdate
 	obj.draw = drawObject
@@ -64,15 +64,28 @@ func newObjectFromFile(name string) (o object, e error) {
 		case "v":
 			// reading vertex
 			if len(fields) != 4 {
-				return object{}, errors.New("vertex field count != 4")
+				return o, errors.New("vertex field count != 4")
 			}
-			vertices = append(vertices, [3]float64{strconvfields[1], fields[2], fields[3]})
+			f1, err := strconv.ParseFloat(fields[1], 64)
+			f2, err2 := strconv.ParseFloat(fields[2], 64)
+			f3, err3 := strconv.ParseFloat(fields[3], 64)
+			if err != nil || err2 != nil || err3 != nil {
+				return o, errors.New(fmt.Sprintf("error parsing float from vertex on line %v\n", i))
+			}
+			vertices = append(vertices, [3]float64{f1, f2, f3})
 		case "f":
 			// reading face
+			//	i, err := strconv.ParseInt("-42", 10, 64)
 			if len(fields) != 4 {
 				return object{}, errors.New("face field count != 4")
 			}
-			faces = append(faces, [3]float64{fields[1], fields[2], fields[3]})
+			i1, err := strconv.ParseInt(fields[1], 10, 64)
+			i2, err2 := strconv.ParseInt(fields[2], 10, 64)
+			i3, err3 := strconv.ParseInt(fields[3], 10, 64)
+			if err != nil || err2 != nil || err3 != nil {
+				return o, errors.New(fmt.Sprintf("error parsing int from face on line %v\n", i))
+			}
+			faces = append(faces, [3]int{int(i1), int(i2), int(i3)})
 		}
 	}
 

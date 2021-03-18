@@ -11,7 +11,6 @@ import (
 //var levelList []string
 
 func init() {
-	ent = loadLevel("test")
 }
 
 const (
@@ -33,6 +32,7 @@ func main() {
 	win, rdr, _, cleanup := initSdl(WINW, WINH)
 	defer cleanup()
 	printRenderInfo(rdr)
+	ent = loadLevel("test")
 	timer := frametimer.Timer{}
 	screenRect = sdl.Rect{X: 0, Y: 0, W: WINW, H: WINH}
 	clearScreen(rdr)

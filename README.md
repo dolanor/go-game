@@ -1,6 +1,8 @@
 Game type: Crash Bandicoot type game or not
 
 load object files
+ability to scale and move objects
+level file with objects described in it
 
 ability to move camera
 

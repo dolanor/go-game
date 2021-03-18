@@ -20,6 +20,7 @@ var rotMat [3][3]float64
 var axis [3]float64
 var camera vec3
 var light vec3
+var wireframeFlag bool
 
 func loadLevel(name string) []object {
 	//dat := ioutil.ReadFile("/level/" + name + ".txt")
@@ -52,9 +53,13 @@ func newObjectFromFile(name string) (o object, e error) {
 		return o, e
 	}
 	dat, e := ioutil.ReadFile(fname)
+	fmt.Printf("read in %v bytes from %v\n", len(dat), fname)
 	if e != nil {
 		panic(e)
 	}
+	// load in vertices
+	// load in faces
+	// do error checks
 	var vertices [][3]float64
 	var faces [][3]int
 	lines := strings.Split(string(dat), "\n")
@@ -66,10 +71,10 @@ func newObjectFromFile(name string) (o object, e error) {
 			if len(fields) != 4 {
 				return o, errors.New("vertex field count != 4")
 			}
-			f1, err := strconv.ParseFloat(fields[1], 64)
+			f1, err1 := strconv.ParseFloat(fields[1], 64)
 			f2, err2 := strconv.ParseFloat(fields[2], 64)
 			f3, err3 := strconv.ParseFloat(fields[3], 64)
-			if err != nil || err2 != nil || err3 != nil {
+			if err1 != nil || err2 != nil || err3 != nil {
 				return o, errors.New(fmt.Sprintf("error parsing float from vertex on line %v\n", i))
 			}
 			vertices = append(vertices, [3]float64{f1, f2, f3})
@@ -79,22 +84,26 @@ func newObjectFromFile(name string) (o object, e error) {
 			if len(fields) != 4 {
 				return object{}, errors.New("face field count != 4")
 			}
-			i1, err := strconv.ParseInt(fields[1], 10, 64)
+			i1, err1 := strconv.ParseInt(fields[1], 10, 64)
 			i2, err2 := strconv.ParseInt(fields[2], 10, 64)
 			i3, err3 := strconv.ParseInt(fields[3], 10, 64)
-			if err != nil || err2 != nil || err3 != nil {
+			if err1 != nil || err2 != nil || err3 != nil {
 				return o, errors.New(fmt.Sprintf("error parsing int from face on line %v\n", i))
 			}
 			faces = append(faces, [3]int{int(i1), int(i2), int(i3)})
 		}
 	}
-
-	// load in vertices
-	// load in faces
-	// do error check
+	fmt.Printf("%v vertices. %v faces. vertices / faces= %v\n",
+		len(vertices), len(faces), float64(len(faces))/float64(len(vertices)))
 	// create triangles from face #s
-
-	fmt.Printf("read in %v bytes from %v\n", len(dat), fname)
+	var tmpTri tri
+	for i := range faces {
+		vIdx1, vIdx2, vIdx3 := faces[i][0]-1, faces[i][1]-1, faces[i][2]-1
+		tmpTri.vert[0] = [3]float64{vertices[vIdx1][0], vertices[vIdx1][1], vertices[vIdx1][2]}
+		tmpTri.vert[1] = [3]float64{vertices[vIdx2][0], vertices[vIdx2][1], vertices[vIdx2][2]}
+		tmpTri.vert[2] = [3]float64{vertices[vIdx3][0], vertices[vIdx3][1], vertices[vIdx3][2]}
+		o.dat = append(o.dat, tmpTri)
+	}
 	return
 }
 
@@ -170,7 +179,8 @@ func drawObject(rdr *sdl.Renderer, o *object) {
 			var projectedTri [3][2]float64
 			for vertex := range tr.vert {
 				var projTmp vec4
-				tr.vert[vertex][2] += 3.0
+				// translate backward
+				tr.vert[vertex][2] += 0.75
 				// create 1x4 so we can multipy by the projMat
 				projTmp = vec4{tr.vert[vertex][0], tr.vert[vertex][1], tr.vert[vertex][2], 1.0}
 				// multiply each 1x4 by the projMat
@@ -209,11 +219,13 @@ func RenderProjectedTri(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Colo
 	tri2dInt[1] = [2]int32{int32(math.Round(tri2d[1][0])), int32(math.Round(tri2d[1][1]))}
 	tri2dInt[2] = [2]int32{int32(math.Round(tri2d[2][0])), int32(math.Round(tri2d[2][1]))}
 
-	// draw wireframe
-	rdr.SetDrawColor(255, 255, 255, 255)
-	rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
-	rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
-	rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])
+	if wireframeFlag {
+		// draw wireframe
+		rdr.SetDrawColor(255, 255, 255, 255)
+		rdr.DrawLine(tri2dInt[0][0], tri2dInt[0][1], tri2dInt[1][0], tri2dInt[1][1])
+		rdr.DrawLine(tri2dInt[1][0], tri2dInt[1][1], tri2dInt[2][0], tri2dInt[2][1])
+		rdr.DrawLine(tri2dInt[2][0], tri2dInt[2][1], tri2dInt[0][0], tri2dInt[0][1])
+	}
 	// draw filled triangle
 	rdr.SetDrawColor(color.R, color.G, color.B, color.A)
 	gfx.FilledTrigonRGBA(rdr, tri2dInt[0][0], tri2dInt[0][1],

@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"mathlib"
 	"os"
 	"sort"
+	"strings"
 
 	"go-sdl2/gfx"
 	"go-sdl2/sdl"
@@ -24,11 +26,16 @@ func loadLevel(name string) []object {
 	axis = vec3{0.5, 0.5, 0.5}
 	camera = vec3{0, 0.0, +1}
 	light = vec3{0, 0, 1}
-	cube := initCube()
-	cube.update = cubeUpdate
-	cube.draw = drawObject
+	//cube := initCube()
+	obj, err := newObjectFromFile("icosphere")
+	if err != nil {
+		panic(err)
+		os.Exit(1)
+	}
+	obj.update = cubeUpdate
+	obj.draw = drawObject
 	entities := []object{}
-	entities = append(entities, cube)
+	entities = append(entities, obj)
 	return entities
 }
 
@@ -39,7 +46,7 @@ func loadLevel(name string) []object {
 // vt is a texture coordinate
 func newObjectFromFile(name string) (o object, e error) {
 	// verify that file exists
-	fname := "/objects/" + name + ".obj"
+	fname := `.\objects\` + name + ".obj"
 	if _, e = os.Stat(fname); os.IsNotExist(e) {
 		fmt.Printf("file %v does not exist\n", fname)
 		return o, e
@@ -48,7 +55,33 @@ func newObjectFromFile(name string) (o object, e error) {
 	if e != nil {
 		panic(e)
 	}
-	fmt.Printf("read in %v bytes from %v\n", fname, len(dat))
+	var vertices [][3]float64
+	var faces [][3]int
+	lines := strings.Split(string(dat), "\n")
+	for i := range lines {
+		fields := strings.Split(lines[i], " ")
+		switch fields[0] {
+		case "v":
+			// reading vertex
+			if len(fields) != 4 {
+				return object{}, errors.New("vertex field count != 4")
+			}
+			vertices = append(vertices, [3]float64{strconvfields[1], fields[2], fields[3]})
+		case "f":
+			// reading face
+			if len(fields) != 4 {
+				return object{}, errors.New("face field count != 4")
+			}
+			faces = append(faces, [3]float64{fields[1], fields[2], fields[3]})
+		}
+	}
+
+	// load in vertices
+	// load in faces
+	// do error check
+	// create triangles from face #s
+
+	fmt.Printf("read in %v bytes from %v\n", len(dat), fname)
 	return
 }
 
@@ -84,6 +117,9 @@ func cubeUpdate(o *object) {
 func drawObject(rdr *sdl.Renderer, o *object) {
 	var projectedTriangles [][3][2]float64
 	{
+		if len(o.dat) == 0 {
+			fmt.Println("drawing object with 0 triangles")
+		}
 		// sort o.dat ( []tri ) by distance of midpoint to camera
 		sort.SliceStable(o.dat, func(i, j int) bool {
 			imid := mathlib.MidpointTri(o.dat[i].vert)

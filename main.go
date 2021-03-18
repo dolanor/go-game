@@ -61,7 +61,9 @@ func main() {
 		}
 		// update
 		for i := range ent {
-			ent[i].update(&ent[i])
+			if ent[i].update != nil {
+				ent[i].update(&ent[i])
+			}
 		}
 		// draw
 		clearScreen(rdr)

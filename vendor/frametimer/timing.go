@@ -1,7 +1,6 @@
 package frametimer
 
 import (
-	"fmt"
 	"go-sdl2/sdl"
 	"time"
 )
@@ -23,9 +22,9 @@ type Timer struct {
 func (ft *Timer) RecordTime() int64 {
 	// delay to cap the framerate
 	frametime := ft.GetElapsedSinceLast()
-	if ft.TotalFrames%50 == 0 {
-		fmt.Println("frametime (ms):", float64(frametime/1_000))
-	}
+	//if ft.TotalFrames%50 == 0 {
+	//	fmt.Println("frametime (ms):", float64(frametime/1_000))
+	//}
 	pauseTime := float64(16_333 - frametime)
 	if pauseTime > 0 {
 		delayMilli := uint32(pauseTime / 1_000)

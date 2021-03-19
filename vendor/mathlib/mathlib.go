@@ -49,6 +49,15 @@ func SubtrVec3(a, b [3]float64) (c [3]float64) {
 	return
 }
 
+// MultVec3 scales a vector by a multiplier
+func MultVec3(a, b [3]float64) (c [3]float64) {
+	c[0] = a[0] * b[0]
+	c[1] = a[1] * b[1]
+	c[2] = a[2] * b[2]
+	return
+}
+
+// MidpointTri finds midpoint of triangle
 // MidpointTri finds midpoint of triangle
 func MidpointTri(a [3][3]float64) (c [3]float64) {
 	c[0] = (a[0][0] + a[1][0] + a[2][0]) / 3

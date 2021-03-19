@@ -15,28 +15,35 @@ import (
 	"go-sdl2/sdl"
 )
 
-var projMat [4][4]float64
-var rotMat [3][3]float64
-var axis [3]float64
-var camera vec3
-var light vec3
-var wireframeFlag bool
+var (
+	projMat       [4][4]float64
+	rotMat        [3][3]float64
+	axis          [3]float64
+	camera        vec3
+	light         vec3
+	wireframeFlag bool
+	objCounter    int
+)
 
 func loadLevel(name string) []object {
-	//dat := ioutil.ReadFile("/level/" + name + ".txt")
+	//mesh := ioutil.ReadFile("/level/" + name + ".txt")
 	projMat = mathlib.PerspectiveMat(math.Pi/2, WINW/WINH, 0.1, 100)
 	axis = vec3{0.5, 0.5, 0.5}
 	camera = vec3{0, 0.0, +1}
 	light = vec3{0, 0, 1}
 	//cube := initCube()
 	obj, err := newObjectFromFile("icosphere")
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	obj.update = cubeUpdate
 	obj.draw = drawObject
+	obj2 := obj // make a copy of the object
+	// make deep copy of mesh
+	obj2.mesh = make([]tri, len(obj.mesh))
+	copy(obj2.mesh, obj.mesh)
+	obj2.move(vec3{0.5, 0, 0})
 	entities := []object{}
 	entities = append(entities, obj)
+	entities = append(entities, obj2)
 	return entities
 }
 
@@ -52,8 +59,8 @@ func newObjectFromFile(name string) (o object, e error) {
 		fmt.Printf("file %v does not exist\n", fname)
 		return o, e
 	}
-	dat, e := ioutil.ReadFile(fname)
-	fmt.Printf("read in %v bytes from %v\n", len(dat), fname)
+	data, e := ioutil.ReadFile(fname)
+	fmt.Printf("read in %v bytes from %v\n", len(data), fname)
 	if e != nil {
 		panic(e)
 	}
@@ -62,7 +69,7 @@ func newObjectFromFile(name string) (o object, e error) {
 	// do error checks
 	var vertices [][3]float64
 	var faces [][3]int
-	lines := strings.Split(string(dat), "\n")
+	lines := strings.Split(string(data), "\n")
 	for i := range lines {
 		fields := strings.Split(lines[i], " ")
 		switch fields[0] {
@@ -102,24 +109,26 @@ func newObjectFromFile(name string) (o object, e error) {
 		tmpTri.vert[0] = [3]float64{vertices[vIdx1][0], vertices[vIdx1][1], vertices[vIdx1][2]}
 		tmpTri.vert[1] = [3]float64{vertices[vIdx2][0], vertices[vIdx2][1], vertices[vIdx2][2]}
 		tmpTri.vert[2] = [3]float64{vertices[vIdx3][0], vertices[vIdx3][1], vertices[vIdx3][2]}
-		o.dat = append(o.dat, tmpTri)
+		o.mesh = append(o.mesh, tmpTri)
 	}
+	objCounter++
+	o.id = objCounter
 	return
 }
 
 func initCube() (o object) {
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 0}, {1, 1, 1}, {1, 0, 1}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {0, 1, 1}, {0, 0, 1}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 0, 1}, {0, 1, 0}, {0, 0, 0}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{0, 1, 0}, {1, 1, 1}, {1, 1, 0}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {0, 0, 1}, {0, 0, 0}}})
-	o.dat = append(o.dat, tri{vert: [3][3]float64{{1, 0, 1}, {0, 0, 0}, {1, 0, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{1, 0, 0}, {1, 1, 1}, {1, 0, 1}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{1, 0, 1}, {0, 1, 1}, {0, 0, 1}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{0, 0, 1}, {0, 1, 0}, {0, 0, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{0, 1, 0}, {1, 1, 1}, {1, 1, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{1, 0, 1}, {0, 0, 1}, {0, 0, 0}}})
+	o.mesh = append(o.mesh, tri{vert: [3][3]float64{{1, 0, 1}, {0, 0, 0}, {1, 0, 0}}})
 	return
 }
 
@@ -128,10 +137,10 @@ func cubeUpdate(o *object) {
 	// tri is [3][3]float64
 	rotMat = mathlib.RotationMat(0.0095, axis)
 
-	for triIdx, tr := range o.dat {
+	for triIdx, tr := range o.mesh {
 		for vertex := range tr.vert {
 			result := mathlib.MultiplyMatVec3(rotMat, tr.vert[vertex])
-			o.dat[triIdx].vert[vertex] = result
+			o.mesh[triIdx].vert[vertex] = result
 		}
 	}
 }
@@ -139,19 +148,19 @@ func cubeUpdate(o *object) {
 func drawObject(rdr *sdl.Renderer, o *object) {
 	var projectedTriangles [][3][2]float64
 	{
-		if len(o.dat) == 0 {
+		if len(o.mesh) == 0 {
 			fmt.Println("drawing object with 0 triangles")
 		}
-		// sort o.dat ( []tri ) by distance of midpoint to camera
-		sort.SliceStable(o.dat, func(i, j int) bool {
-			imid := mathlib.MidpointTri(o.dat[i].vert)
-			jmid := mathlib.MidpointTri(o.dat[j].vert)
+		// sort o.mesh ( []tri ) by distance of midpoint to camera
+		sort.SliceStable(o.mesh, func(i, j int) bool {
+			imid := mathlib.MidpointTri(o.mesh[i].vert)
+			jmid := mathlib.MidpointTri(o.mesh[j].vert)
 			idistToCamera := mathlib.DistVec3(imid, camera)
 			jdistToCamera := mathlib.DistVec3(jmid, camera)
 			return idistToCamera > jdistToCamera
 		})
 
-		for trIdx, tr := range o.dat {
+		for trIdx, tr := range o.mesh {
 
 			// calculate normal
 			normal := mathlib.CrossProductVec3(mathlib.SubtrVec3(tr.vert[1], tr.vert[0]),
@@ -164,16 +173,16 @@ func drawObject(rdr *sdl.Renderer, o *object) {
 			// @TODO: check these normals by drawing them
 			similarityToCamera := mathlib.DotProductVec3(normal, camera)
 			if similarityToCamera < 0 {
-				o.dat[trIdx].visible = true
+				o.mesh[trIdx].visible = true
 			} else {
-				o.dat[trIdx].visible = false
+				o.mesh[trIdx].visible = false
 			}
 			// calculate whether normal <= 90 degrees with camera
 			similarityToLight := mathlib.DotProductVec3(normal, light)
 			if similarityToLight < 0 {
-				o.dat[trIdx].shade = uint8(-similarityToLight * 255)
+				o.mesh[trIdx].shade = uint8(-similarityToLight * 255)
 			} else {
-				o.dat[trIdx].shade = 0
+				o.mesh[trIdx].shade = 0
 			}
 
 			var projectedTri [3][2]float64
@@ -200,9 +209,9 @@ func drawObject(rdr *sdl.Renderer, o *object) {
 			screenTri[i][0] *= 0.5 * WINW
 			screenTri[i][1] *= 0.5 * WINH
 		}
-		if o.dat[i].visible {
+		if o.mesh[i].visible {
 			// shade triangle faces
-			RenderProjectedTri(rdr, &screenTri, &sdl.Color{R: o.dat[i].shade, G: 100, B: 100, A: 255})
+			RenderProjectedTri(rdr, &screenTri, &sdl.Color{R: o.mesh[i].shade, G: 100, B: 100, A: 255})
 		}
 	}
 }
@@ -233,4 +242,10 @@ func RenderProjectedTri(rdr *sdl.Renderer, tri2d *[3][2]float64, color *sdl.Colo
 		tri2dInt[2][0], tri2dInt[2][1], color.R, color.G, color.B, color.A)
 	// change back to previous color
 	rdr.SetDrawColor(r, g, b, a)
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }

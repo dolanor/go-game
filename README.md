@@ -1,5 +1,7 @@
 Game type: Crash Bandicoot type game or not
 
+need objects to be drawn back to front
+
 level file with objects described in it
 
 ability to move camera

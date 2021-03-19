@@ -1,12 +1,20 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"frametimer"
+	"log"
+	"mathlib"
+	"os"
+	"runtime/pprof"
+	"sort"
 	"strconv"
 
 	"go-sdl2/sdl"
 )
+
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 //var levelList []string
 
@@ -28,6 +36,15 @@ var (
 )
 
 func main() {
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	// init objects
 	win, rdr, _, cleanup := initSdl(WINW, WINH)
 	defer cleanup()
@@ -67,7 +84,18 @@ func main() {
 		}
 		// draw
 		clearScreen(rdr)
+		// sort ent by z value before drawing
+		// TODO: Verify that this is really working and not just a comedy of errors
+		// where the midpt and this are both broken
+		sort.Slice(ent, func(i, j int) bool {
+			imid := ent[i].midpoint()
+			jmid := ent[j].midpoint()
+			idistToCamera := mathlib.DistVec3(imid, camera)
+			jdistToCamera := mathlib.DistVec3(jmid, camera)
+			return idistToCamera < jdistToCamera
+		})
 		for i := range ent {
+			// sort o.mesh ( []tri ) by distance of midpoint to camera
 			ent[i].draw(rdr, &ent[i])
 		}
 		rdr.Present()

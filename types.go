@@ -53,3 +53,17 @@ func (o *object) copy() object {
 	copy(newObj.mesh, o.mesh)
 	return *newObj
 }
+
+func (o *object) midpoint() (midpt vec3) {
+	numVert := 0
+	for i := range o.mesh {
+		for j := range o.mesh[i].vert {
+			midpt = mathlib.AddVec3(midpt, o.mesh[i].vert[j])
+			numVert++
+		}
+	}
+	midpt[0] = midpt[0] / float64(numVert)
+	midpt[1] = midpt[1] / float64(numVert)
+	midpt[2] = midpt[2] / float64(numVert)
+	return
+}

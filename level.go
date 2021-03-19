@@ -36,14 +36,21 @@ func loadLevel(name string) []object {
 	check(err)
 	obj.update = cubeUpdate
 	obj.draw = drawObject
-	obj2 := obj // make a copy of the object
+	obj2 := obj.makeCopy()
+	obj3 := obj.makeCopy()
+	obj4 := obj.makeCopy()
+	obj5 := obj.makeCopy()
 	// make deep copy of mesh
-	obj2.mesh = make([]tri, len(obj.mesh))
-	copy(obj2.mesh, obj.mesh)
 	obj2.move(vec3{0.5, 0, 0})
+	obj3.move(vec3{0.5, 0.5, 0})
+	obj4.move(vec3{0, 0.5, 0})
+	obj5.move(vec3{0.5, 0.5, 1.0})
 	entities := []object{}
 	entities = append(entities, obj)
 	entities = append(entities, obj2)
+	entities = append(entities, obj3)
+	entities = append(entities, obj4)
+	entities = append(entities, obj5)
 	return entities
 }
 

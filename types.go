@@ -44,14 +44,14 @@ func (o *object) scale(offset vec3) {
 	}
 }
 
-func (o *object) copy() object {
-	newObj := o  // make a value copy of the object
+func (o *object) makeCopy() object {
+	newObj := *o // make a value copy of the object
 	objCounter++ // increment global object counter
 	newObj.id = objCounter
 	// make deep copy of mesh
 	newObj.mesh = make([]tri, len(o.mesh))
 	copy(newObj.mesh, o.mesh)
-	return *newObj
+	return newObj
 }
 
 func (o *object) midpoint() (midpt vec3) {

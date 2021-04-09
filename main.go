@@ -46,7 +46,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	// init objects
-	win, rdr, _, cleanup := initSdl(WINW, WINH)
+	win, rdr, cleanup := initSdl(WINW, WINH)
 	defer cleanup()
 	printRenderInfo(rdr)
 	ent = loadLevel("test")
@@ -108,7 +108,7 @@ func main() {
 	}
 }
 
-func initSdl(width, height int32) (win *sdl.Window, rdr *sdl.Renderer, surf *sdl.Surface, cleanupFunc func()) {
+func initSdl(width, height int32) (win *sdl.Window, rdr *sdl.Renderer, cleanupFunc func()) {
 	var err error
 	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
@@ -117,14 +117,11 @@ func initSdl(width, height int32) (win *sdl.Window, rdr *sdl.Renderer, surf *sdl
 	if err != nil {
 		panic(err)
 	}
-	if surf, err = win.GetSurface(); err != nil {
-		panic(err)
-	}
 	cleanup := func() {
 		defer sdl.Quit()
 		defer win.Destroy()
 	}
-	return win, rdr, surf, cleanup
+	return win, rdr, cleanup
 }
 
 func clearScreen(rdr *sdl.Renderer) {

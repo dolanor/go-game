@@ -7,6 +7,7 @@ import (
 	"math"
 	"mathlib"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -61,7 +62,7 @@ func loadLevel(name string) []object {
 // vt is a texture coordinate
 func newObjectFromFile(name string) (o object, e error) {
 	// verify that file exists
-	fname := `.\objects\` + name + ".obj"
+	fname := filepath.Join(".", "objects", name+".obj")
 	if _, e = os.Stat(fname); os.IsNotExist(e) {
 		fmt.Printf("file %v does not exist\n", fname)
 		return o, e
